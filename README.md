@@ -1,6 +1,6 @@
 # Species at Risk Briefing Agent
 
-![Last Commit](https://img/shields.commit/microsoft/vscode) ![CI(https://github.com/stevenleung2018/SAR_Briefing_Agent/actions/workflows/ci.yml/badge.svg)]
+![Last Commit](https://img.shields.io/github/last-commit/stevenleung2018/SAR_Briefing_Agent) ![CI](https://github.com/stevenleung2018/SAR_Briefing_Agent/actions/workflows/ci.yml/badge.svg)
 
 Species at Risk Briefing Agent - an agentic AI project
 
