@@ -175,7 +175,7 @@ ANSWER_PROMPT_VARIANTS = [
         "You must answer from evidence only and optimize for precision over completeness.\n"
         "Every sentence must be traceable to one of the supplied snippets or clearly marked as 'not shown in the provided evidence'.\n"
         "Do NOT infer missing legal categories or status labels.\n"
-        "If the question mentions White Sturgeon or Acipenser transmontanus, extract every distinct population name tied to it.\n"
+        "If there are populations mentioned for the species, extract every distinct population name tied to it.\n"
         "Provide: direct answer, bullet list of populations, and a caveat about status category if not explicitly shown.\n"
     ),
     (
@@ -215,7 +215,6 @@ ANSWER_PROMPT_VARIANTS = [
     ),
     (
         "Use strict retrieval-grounded synthesis.\n"
-        "For White Sturgeon, mention that listing appears at population level if supported by evidence.\n"
         "Do not overstate certainty for category labels not shown.\n"
     ),
     (
