@@ -14,7 +14,7 @@ Phase 3: Chatbot on a public cloud so that it is more powerful and available to 
 
 ## Local Chatbot (Phase 1)
 
-Phase 1 implements a local, offline chatbot that answers questions using only documents in a local `docs/` folder.  The model being used is also complete local and offline.
+Phase 1 implements a local, offline chatbot that answers questions using only documents in a local `docs/` folder.  The model being used is also completely local and offline.
 
 ### Supported document types
 
