@@ -632,13 +632,24 @@ def build_answer_prompt(
         "N'ajoutez pas de section 'populations listées' sauf si la question le demande explicitement.\n"
         "N'inférez rien qui n'est pas dans les extraits.\n"
     )
-    evidence_self_check = (
+    evidence_self_check_en = (
         "Evidence discipline checklist (apply silently before finalizing):\n"
         "- Every factual claim must be directly supported by a specific evidence snippet.\n"
         "- If a legal category is not explicitly shown, state 'not directly shown in the provided evidence' rather than inferring it.\n"
         "- Distinguish between species inclusion in SARA and exact status wording such as threatened/endangered/special concern.\n"
         "- Do not add population names, legal categories, or consequences that are not present in the excerpts.\n"
         "- When the evidence is incomplete, prefer a conservative, evidence-backed caveat over a stronger claim.\n"
+    )
+    evidence_self_check_fr = (
+        "Liste de vérification de discipline des preuves (à appliquer silencieusement avant de finaliser) :\n"
+        "- Chaque affirmation factuelle doit être directement appuyée par un extrait de preuve précis.\n"
+        "- Si une catégorie juridique n’est pas explicitement indiquée, dites qu’elle n’est pas directement montrée dans les preuves fournies plutôt que de l’inférer.\n"
+        "- Distinguez entre l’inclusion dans la LEP et le libellé exact du statut (menacée/en voie de disparition/préoccupante, etc.).\n"
+        "- N’ajoutez pas de noms de populations, de catégories juridiques ou de conséquences qui ne figurent pas dans les extraits.\n"
+        "- Quand les preuves sont incomplètes, privilégiez une réserve prudente et fondée sur les preuves.\n"
+    )
+    evidence_self_check = (
+        evidence_self_check_fr if language == "fr" else evidence_self_check_en
     )
     if language == "fr":
         return (
