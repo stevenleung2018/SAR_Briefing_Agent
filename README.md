@@ -104,6 +104,6 @@ python3 src/evaluate_answer_quality.py --results-dir results --iterations 10
 
 ## Disclaimers
 
-1. This is a personal project and my employer has no involvement in this. It is therefore not representative of the position of my employer. All opinions are mine.)
+1. This is a personal project and my employer has no involvement in this. It is therefore not representative of the position of my employer. All opinions are mine.
 2. All information in this repository or that the code uses is completely in the public domain. No protected or secret information is used and the code does not require any such information to work.
 3. Even though I have reasonable methodology in fine-tuning the code to improve the quality of the answers, just as any other AI tool, the tool may make mistakes.
