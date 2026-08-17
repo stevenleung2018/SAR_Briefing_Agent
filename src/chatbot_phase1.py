@@ -169,8 +169,7 @@ ANSWER_PROMPT_VARIANTS = [
         "Do not use outside knowledge, assumptions, or legal status beyond the snippets.\n"
         "Distinguish between (a) the species appears in SARA material and (b) the exact legal category is explicitly shown in the evidence.\n"
         "If the snippets do not show a status such as threatened, endangered, or special concern, say precisely that the legal category cannot be verified from the provided evidence.\n"
-        "Return concise Markdown with this structure:\n"
-        "1) Direct answer\n2) Listed populations (if present)\n3) Status caveat\n"
+        "Return concise Markdown and follow the preferred structure headings provided later in this prompt.\n"
     ),
     (
         "You must answer from evidence only and optimize for precision over completeness.\n"
