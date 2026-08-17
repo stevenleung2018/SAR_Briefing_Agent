@@ -33,11 +33,25 @@ Run language-classification benchmark independently:
 python3 src/benchmark_language_model.py --results-dir results
 ```
 
+- Tests whether Ollama's default available model can classify 20 sample questions: 10 in English and 10 in French.
+- Uses the LLM as a language-classifier baseline before it is used for chatbot interactions.
+- Saves each tested model's result as a model-specific JSON cache file in the results directory and reuses it on future chatbot starts, so the same model is not retested every time.
+- Requires at least 8 of 10 significant classifications in each language; otherwise, the chatbot does not launch and the user should use a better Ollama model.
+- Supports `--force` when the benchmark should be rerun instead of using the cached result.
+
 ### Answer quality evaluation script
 Run iterative prompt evaluation (up to 10 prompt variants) against a reference answer, scored with Gemini:
 ```bash
 python3 src/evaluate_answer_quality.py --results-dir results --iterations 10
 ```
+
+- Follows the Ragas framework for evaluating retrieval-augmented generation. Ragas was chosen because it is the most widely cited framework in this area and provides an existing Python package (`ragas`, included in `requirements.txt`).
+- Uses Google Gemini as the second LLM evaluator during prompt fine-tuning, scoring each candidate answer against the reference answer and retrieved-evidence intent.
+- Compares prompt variants primarily by **weighted claim-level F1**, paired with **unsupported-claim rate** and a **high-severity contradiction gate**.
+- Requires a prompt to meet the weighted claim-level F1 threshold and stay below the configured high-severity contradiction gate; unsupported-claim rate is reported as a companion metric for analysis.
+- Stops iterating when a passing prompt is found; otherwise, it records the available prompt variants and reports the candidate with the highest weighted claim-level F1.
+- Writes detailed JSON and CSV evaluation outputs, including the candidate answer and pass/fail metrics, to the results directory.
+- Cites: S. Es, J. James, L. Espinosa-Anke, and S. Schockaert, “RAGAS: Automated Evaluation of Retrieval Augmented Generation,” *Proceedings of the EACL 2024 Demonstration Track*, pp. 150–158, 2024. https://doi.org/10.18653/v1/2024.eacl-demo.16
 
 ### Notes
 - The chatbot is evidence-grounded: it only answers from local documents.

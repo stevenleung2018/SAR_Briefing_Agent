@@ -164,23 +164,27 @@ RECOVERY_CONCEPT_GROUPS = {
 }
 ANSWER_PROMPT_VARIANTS = [
     (
-        "You are a legal evidence summarizer for Canada's Species at Risk Act (SARA).\n"
-        "Use ONLY the supplied evidence snippets. Do not use outside knowledge.\n"
-        "If evidence does not show an exact legal category, explicitly say it cannot be verified.\n"
+        "You are a retrieval-grounded legal QA assistant for Canada's Species at Risk Act (SARA).\n"
+        "Follow a claim-by-claim evidence policy inspired by RAGAS: every factual statement must be directly supported by the supplied excerpts, and unsupported statements must be removed or clearly labeled as not shown.\n"
+        "Do not use outside knowledge, assumptions, or legal status beyond the snippets.\n"
+        "Distinguish between (a) the species appears in SARA material and (b) the exact legal category is explicitly shown in the evidence.\n"
+        "If the snippets do not show a status such as threatened, endangered, or special concern, say precisely that the legal category cannot be verified from the provided evidence.\n"
         "Return concise Markdown with this structure:\n"
         "1) Direct answer\n2) Listed populations (if present)\n3) Status caveat\n"
     ),
     (
-        "You must answer from evidence only.\n"
-        "Do NOT infer missing legal categories.\n"
+        "You must answer from evidence only and optimize for precision over completeness.\n"
+        "Every sentence must be traceable to one of the supplied snippets or clearly marked as 'not shown in the provided evidence'.\n"
+        "Do NOT infer missing legal categories or status labels.\n"
         "If the question mentions White Sturgeon or Acipenser transmontanus, extract every distinct population name tied to it.\n"
-        "Provide: direct answer, bullet list of populations, and a caveat about status category if not shown.\n"
+        "Provide: direct answer, bullet list of populations, and a caveat about status category if not explicitly shown.\n"
     ),
     (
-        "Grounded QA task.\n"
+        "Grounded QA task with evidence discipline.\n"
         "Use only evidence snippets below.\n"
         "For species questions, distinguish between 'appears in SARA material' and 'specific legal category shown'.\n"
-        "If category is missing, state that clearly and avoid guessing.\n"
+        "If category is missing, say the exact legal status is not displayed in the provided excerpts and avoid guessing.\n"
+        "Do not add any legal conclusion that the snippets do not state directly.\n"
     ),
     (
         "Evidence-locked response policy:\n"
@@ -629,10 +633,19 @@ def build_answer_prompt(
         "N'ajoutez pas de section 'populations listées' sauf si la question le demande explicitement.\n"
         "N'inférez rien qui n'est pas dans les extraits.\n"
     )
+    evidence_self_check = (
+        "Evidence discipline checklist (apply silently before finalizing):\n"
+        "- Every factual claim must be directly supported by a specific evidence snippet.\n"
+        "- If a legal category is not explicitly shown, state 'not directly shown in the provided evidence' rather than inferring it.\n"
+        "- Distinguish between species inclusion in SARA and exact status wording such as threatened/endangered/special concern.\n"
+        "- Do not add population names, legal categories, or consequences that are not present in the excerpts.\n"
+        "- When the evidence is incomplete, prefer a conservative, evidence-backed caveat over a stronger claim.\n"
+    )
     if language == "fr":
         return (
             f"{policy}\n"
             f"{recovery_addendum_fr if recovery_intent else ''}"
+            f"{evidence_self_check}\n"
             "Répondez uniquement en français.\n"
             "Structure recommandée:\n"
             f"{structure_fr}\n"
@@ -645,6 +658,7 @@ def build_answer_prompt(
     return (
         f"{policy}\n"
         f"{recovery_addendum_en if recovery_intent else ''}"
+        f"{evidence_self_check}\n"
         "Respond only in English.\n"
         "Preferred structure:\n"
         f"{structure_en}\n"
