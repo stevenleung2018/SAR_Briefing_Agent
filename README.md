@@ -28,7 +28,7 @@ Python 3.12 is recommended especially if you are using Windows.  I also recommen
 
 Please install [ollama](https://ollama.com/) yourself.
 
-If you have not already download the model, you can do that with the following command (using "llama3.1:latest" as the example):
+If you have not already downloaded the model, you can do that with the following command (using "llama3.1:latest" as the example):
 
 ```bash
 ollama pull llama3.1:latest
