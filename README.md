@@ -42,10 +42,13 @@ python3 -m pip install -r requirements.txt
 
 ### Run
 
-Launch Ollama server
+Launch Ollama server.
+
 ```bash
 ollama serve
 ```
+
+Launch the chatbot.
 
 ```bash
 python3 src/chatbot_phase1.py
