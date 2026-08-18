@@ -59,6 +59,19 @@ def test_build_answer_prompt_stays_in_english_and_mentions_recovery_requirements
     assert "## Direct answer" in prompt
 
 
+def test_build_answer_prompt_uses_evidence_summary_for_general_status_questions():
+    prompt = build_answer_prompt(
+        "What is the status of Acadian Flycatcher?",
+        "en",
+        "[Evidence 1] score=0.91 source=doc.txt\nAcadian Flycatcher appears in a list.",
+        2,
+    )
+
+    assert "## Evidence summary" in prompt
+    assert "## Listed populations" not in prompt
+    assert "White Sturgeon" not in prompt
+
+
 def test_resolve_answer_prompt_version_chooses_recovery_variant_when_needed():
     assert resolve_answer_prompt_version("What recovery measures are required?", None) == 1
     assert resolve_answer_prompt_version("Is White Sturgeon a species at risk?", None) == 2

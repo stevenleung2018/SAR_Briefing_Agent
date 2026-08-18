@@ -18,6 +18,7 @@ from chatbot_phase1 import (
     ensure_default_pdf,
     prepare_index,
 )
+from constants import DEFAULT_RESULTS_DIR
 from language_classifier import DEFAULT_OLLAMA_URL, resolve_language_model
 
 DEFAULT_LANGUAGE_MODEL = "llama3:latest"
@@ -41,7 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Evaluate and iteratively improve phase1 answer prompt quality (RAGAS-style)."
     )
-    parser.add_argument("--docs-dir", type=Path, default=Path("docs"))
+    parser.add_argument("--docs-dir", type=Path, default=Path("data"))
     parser.add_argument("--question", default=DEFAULT_QUESTION)
     parser.add_argument("--ground-truth-file", type=Path, default=None)
     parser.add_argument("--ollama-url", default=DEFAULT_OLLAMA_URL)
@@ -51,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--min-score", type=float, default=0.08)
     parser.add_argument("--chunk-size", type=int, default=900)
-    parser.add_argument("--results-dir", type=Path, default=Path("results"))
+    parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS_DIR)
     parser.add_argument("--gemini-model", default=DEFAULT_GEMINI_MODEL)
     parser.add_argument("--contradiction-gate", type=float, default=0.49)
     return parser.parse_args()

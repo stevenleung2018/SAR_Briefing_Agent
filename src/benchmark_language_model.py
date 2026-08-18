@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from constants import DEFAULT_RESULTS_DIR
 from language_classifier import (
     DEFAULT_OLLAMA_URL,
     get_or_run_language_benchmark,
@@ -32,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--results-dir",
         type=Path,
-        default=Path("results"),
+        default=DEFAULT_RESULTS_DIR,
         help="Directory for benchmark cache files.",
     )
     parser.add_argument(
