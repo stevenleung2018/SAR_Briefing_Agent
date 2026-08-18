@@ -220,3 +220,6 @@ __marimo__/
 # Data
 
 data/*
+
+# Model test results
+model_test_results/*
