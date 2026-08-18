@@ -1,6 +1,6 @@
 # Species at Risk Briefing Agent
 
-![Last Commit](https://img/shields.commit/microsoft/vscode) ![CI(https://github.com/stevenleung2018/SAR_Briefing_Agent/actions/workflows/ci.yml/badge.svg)]
+![Last Commit](https://img.shields.io/github/last-commit/stevenleung2018/SAR_Briefing_Agent) ![CI](https://github.com/stevenleung2018/SAR_Briefing_Agent/actions/workflows/ci.yml/badge.svg)
 
 Species at Risk Briefing Agent - an agentic AI project
 
@@ -14,7 +14,7 @@ Phase 3: Chatbot on a public cloud so that it is more powerful and available to 
 
 ## Local Chatbot (Phase 1)
 
-Phase 1 implements a local, offline chatbot that answers questions using only documents in a local `docs/` folder.  The model being used is also complete local and offline.
+Phase 1 implements a local, offline chatbot that answers questions using only documents in a local `docs/` folder.  The model being used is also completely local and offline.
 
 ### Supported document types
 
@@ -28,7 +28,7 @@ Python 3.12 is recommended especially if you are using Windows.  I also recommen
 
 Please install [ollama](https://ollama.com/) yourself.
 
-If you have not already download the model, you can do that with the following command (using "llama3.1:latest" as the example):
+If you have not already downloaded the model, you can do that with the following command (using "llama3.1:latest" as the example):
 
 ```bash
 ollama pull llama3.1:latest
@@ -107,6 +107,6 @@ python3 src/evaluate_answer_quality.py --results-dir results --iterations 10
 
 ## Disclaimers
 
-1. This is a personal project and my employer has no involvement in this. It is therefore not representative of the position of my employer. All opinions are mine.)
+1. This is a personal project and my employer has no involvement in this. It is therefore not representative of the position of my employer. All opinions are mine.
 2. All information in this repository or that the code uses is completely in the public domain. No protected or secret information is used and the code does not require any such information to work.
 3. Even though I have reasonable methodology in fine-tuning the code to improve the quality of the answers, just as any other AI tool, the tool may make mistakes.
