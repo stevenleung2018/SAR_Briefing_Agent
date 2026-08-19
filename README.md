@@ -6,6 +6,21 @@ Species at Risk Briefing Agent - an agentic AI project
 
 (Disclaimers at the bottom of the page.)
 
+## Executive summary
+
+The Species at Risk Public Registry is intended for the general public and holds authoritative information on species protected under the Species at Risk Act. However, it is organized as a repository of documents and listings, not as a way to answer the direct questions people actually have in real-life situations, such as "Can I do X in this area? Is it affecting any at-risk animals?" Finding that answer today means knowing where to look, which documents apply, and how to interpret them. The Species at Risk Briefing Agent is an agentic AI chatbot that bridges this gap: it takes a plain-language question and returns a clear, evidence-grounded answer drawn from the Registry, so that no training or prior familiarity with the Registry is required. The project is being built in three phases, starting with a fully local, offline chatbot over a small document set (Phase 1), then adding agentic access to the live Public Registry and other online resources (Phase 2), and finally deploying to the public cloud so it is available to everyone (Phase 3).
+
+## Objectives of this project
+- Create a scalable application with a natural language interface that bridges the gap between the Species at Risk Public Registry's documents and listings and the direct, real-life questions the public actually has.
+- Require no training or prior expertise to use: a member of the general public should be able to ask a plain-language, real-world question (e.g. "Can I do X in this area? Is it affecting any at-risk animals?") and get a clear, understandable answer, without needing to know where to look, which documents apply, or how to interpret them.
+- Ground every answer in authoritative, up-to-date evidence from the Species at Risk Public Registry and related official sources, rather than relying on the model's general knowledge, so answers are trustworthy for real-life decisions.
+- Be explicit about uncertainty and limitations: clearly state when the available evidence does not answer the question, direct the user to the appropriate official resource or contact, and avoid presenting speculation as fact.
+- Support bilingual (English and French) interactions, reflecting the bilingual nature of the source registry and its public audience.
+- The target user groups include:
+    - Members of the general public planning an activity (e.g. construction, land use, recreation) who want to know if at-risk species may be affected in their area.
+    - Landowners, contractors, and small business operators seeking a quick, plain-language answer about potential Species at Risk Act obligations before proceeding with an activity.
+    - Community members, students, and researchers who want an accessible way to explore information about species at risk without needing prior familiarity with the registry or legal/technical terminology.
+
 This project has 3 phases:
 
 Phase 1: Local offline chatbot
