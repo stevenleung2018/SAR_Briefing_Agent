@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Phase 1 local chatbot:
-- Answers questions using only offline documents in a local docs/ folder.
+- Answers questions using only offline documents in a local data/ folder.
 - Supports .txt, .md, and .pdf files.
 - Uses TF-IDF retrieval and evidence-grounded responses.
 """
@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 
 from pypdf import PdfReader
 
+from constants import DEFAULT_RESULTS_DIR
 from language_classifier import (
     LanguageScores,
     assert_model_can_classify,
@@ -105,6 +106,19 @@ QUERY_STOPWORDS = {
     "quelles",
     "quels",
 }
+POPULATION_LISTING_TERMS = {
+    "population",
+    "populations",
+    "listed populations",
+    "population list",
+    "population-level",
+    "population level",
+    "population names",
+    "populations listées",
+    "population listée",
+    "liste des populations",
+    "nom des populations",
+}
 RECOVERY_INTENT_TERMS = {
     "recovery",
     "recover",
@@ -175,8 +189,8 @@ ANSWER_PROMPT_VARIANTS = [
         "You must answer from evidence only and optimize for precision over completeness.\n"
         "Every sentence must be traceable to one of the supplied snippets or clearly marked as 'not shown in the provided evidence'.\n"
         "Do NOT infer missing legal categories or status labels.\n"
-        "If there are populations mentioned for the species, extract every distinct population name tied to it.\n"
-        "Provide: direct answer, bullet list of populations, and a caveat about status category if not explicitly shown.\n"
+        "When population-level listing is requested, include only populations explicitly tied to the asked species in the evidence.\n"
+        "Provide: direct answer, evidence summary, and a caveat about status category if not explicitly shown.\n"
     ),
     (
         "Grounded QA task with evidence discipline.\n"
@@ -206,7 +220,7 @@ ANSWER_PROMPT_VARIANTS = [
     (
         "You are scoring yourself for hallucination risk.\n"
         "Prefer caveated truth over unsupported detail.\n"
-        "Output markdown with: Direct answer, Population-level listing evidence, Status caveat.\n"
+        "Output markdown with: Direct answer, Evidence summary, Status caveat.\n"
     ),
     (
         "Produce a conservative legal brief from provided snippets.\n"
@@ -215,6 +229,7 @@ ANSWER_PROMPT_VARIANTS = [
     ),
     (
         "Use strict retrieval-grounded synthesis.\n"
+        "If the question asks about population-level listing, mention it only when supported by evidence.\n"
         "Do not overstate certainty for category labels not shown.\n"
     ),
     (
@@ -249,8 +264,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--docs-dir",
         type=Path,
-        default=Path("docs"),
-        help="Path to local documents directory (default: docs).",
+        default=Path("data"),
+        help="Path to local documents directory (default: data).",
     )
     parser.add_argument(
         "--top-k",
@@ -478,23 +493,16 @@ def prepare_index(chunks: list[Chunk], idf: dict[str, float]) -> list[tuple[Chun
     return [(chunk, tfidf_vector(chunk.tokens, idf)) for chunk in chunks]
 
 
-def build_species_phrase_hints(question: str) -> set[str]:
-    """Return phrase aliases that help the retriever find species-specific sections in the legal text."""
-    lower = question.lower()
-    hints: set[str] = set()
-    if "white sturgeon" in lower or ("white" in lower and "sturgeon" in lower):
-        hints.update({"sturgeon, white", "white sturgeon", "acipenser transmontanus"})
-    if "esturgeon blanc" in lower:
-        hints.update({"esturgeon blanc", "acipenser transmontanus", "sturgeon, white"})
-    if "acipenser" in lower or "transmontanus" in lower:
-        hints.update({"acipenser transmontanus", "sturgeon, white", "esturgeon blanc"})
-    return hints
-
-
 def is_recovery_measures_question(question: str) -> bool:
     """Detect whether the user is asking about recovery requirements rather than general status questions."""
     q = question.lower()
     return any(term in q for term in RECOVERY_INTENT_TERMS)
+
+
+def is_population_listing_question(question: str) -> bool:
+    """Detect whether the user explicitly asks for population-level listing details."""
+    q = question.lower()
+    return any(term in q for term in POPULATION_LISTING_TERMS)
 
 
 def recovery_concept_match_count(chunk_text: str) -> int:
@@ -531,7 +539,6 @@ def retrieve_evidence(
         (focus_tokens[i], focus_tokens[i + 1])
         for i in range(len(focus_tokens) - 1)
     }
-    phrase_hints = build_species_phrase_hints(question)
     scored: list[tuple[Chunk, float]] = []
 
     for chunk, chunk_vec in index:
@@ -552,10 +559,6 @@ def retrieve_evidence(
                         score += 0.20 * (bigram_matches / len(query_bigrams))
                 if matches == len(focus_tokens):
                     score += 0.25
-        if phrase_hints:
-            matched_hints = sum(1 for phrase in phrase_hints if phrase in chunk_lower)
-            if matched_hints:
-                score += 0.60 + 0.15 * matched_hints
         if recovery_intent:
             score += 0.45 * cosine_similarity(recovery_vec, chunk_vec)
             concept_matches = recovery_concept_match_count(chunk_lower)
@@ -604,12 +607,16 @@ def build_answer_prompt(
     idx = min(max(prompt_version, 1), len(ANSWER_PROMPT_VARIANTS)) - 1
     policy = ANSWER_PROMPT_VARIANTS[idx]
     recovery_intent = is_recovery_measures_question(question)
+    population_listing_intent = is_population_listing_question(question)
     if recovery_intent:
         structure_en = "## Direct answer\n## Required recovery measures\n## Implementation and protection\n"
         structure_fr = "## Réponse directe\n## Mesures de rétablissement requises\n## Mise en œuvre et protection\n"
-    else:
+    elif population_listing_intent:
         structure_en = "## Direct answer\n## Listed populations\n## Status caveat\n"
         structure_fr = "## Réponse directe\n## Populations listées\n## Réserve sur le statut\n"
+    else:
+        structure_en = "## Direct answer\n## Evidence summary\n## Status caveat\n"
+        structure_fr = "## Réponse directe\n## Résumé des preuves\n## Réserve sur le statut\n"
     recovery_addendum_en = (
         "Because this is a recovery-measures question, focus on statutory recovery requirements.\n"
         "Extract and list the concrete required elements if present in evidence:\n"
@@ -630,6 +637,14 @@ def build_answer_prompt(
         "Extrayez les éléments obligatoires présents dans les extraits (faisabilité, menaces, habitat essentiel, calendrier, plan d’action, suivi, coûts/bénéfices, protection).\n"
         "N'ajoutez pas de section 'populations listées' sauf si la question le demande explicitement.\n"
         "N'inférez rien qui n'est pas dans les extraits.\n"
+    )
+    population_addendum_en = (
+        "Only include population names when the user explicitly asks for populations.\n"
+        "If populations are requested, list only names directly supported by the evidence and tied to the asked species.\n"
+    )
+    population_addendum_fr = (
+        "N'incluez des noms de populations que si l'utilisateur le demande explicitement.\n"
+        "Si des populations sont demandées, listez uniquement les noms appuyés par les preuves et liés à l'espèce demandée.\n"
     )
     evidence_self_check_en = (
         "Evidence discipline checklist (apply silently before finalizing):\n"
@@ -654,6 +669,7 @@ def build_answer_prompt(
         return (
             f"{policy}\n"
             f"{recovery_addendum_fr if recovery_intent else ''}"
+            f"{population_addendum_fr if population_listing_intent else ''}"
             f"{evidence_self_check}\n"
             "Répondez uniquement en français.\n"
             "Structure recommandée:\n"
@@ -667,6 +683,7 @@ def build_answer_prompt(
     return (
         f"{policy}\n"
         f"{recovery_addendum_en if recovery_intent else ''}"
+        f"{population_addendum_en if population_listing_intent else ''}"
         f"{evidence_self_check}\n"
         "Respond only in English.\n"
         "Preferred structure:\n"
@@ -789,12 +806,12 @@ def answer_question(
             return (
                 scores,
                 "Je ne trouve pas assez de preuves dans les documents locaux pour répondre avec confiance. "
-                "Veuillez ajouter des documents plus pertinents dans docs/ ou reformuler votre question.",
+                "Veuillez ajouter des documents plus pertinents dans data/ ou reformuler votre question.",
             )
         return (
             scores,
             "I can’t find enough evidence in the local documents to answer confidently. "
-            "Please add more relevant documents to docs/ or rephrase your question.",
+            "Please add more relevant documents to data/ or rephrase your question.",
         )
 
     report_progress("answer_generation", "Generating grounded answer from retrieved evidence...")
@@ -1012,7 +1029,7 @@ def main() -> int:
     if was_downloaded:
         print(f"Downloaded default reference PDF: {default_pdf_path}")
 
-    results_dir = Path("results")
+    results_dir = DEFAULT_RESULTS_DIR
     print("[Startup] Resolving language model...", flush=True)
     selected_language_model = resolve_language_model(
         args.ollama_url, args.lang_model, fallback_model=DEFAULT_LANGUAGE_MODEL
